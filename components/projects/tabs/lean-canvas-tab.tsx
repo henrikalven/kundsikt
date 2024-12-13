@@ -1,61 +1,64 @@
-import { useState } from 'react'
-import { SectionCard } from "@/components/section-card"
-import { Project } from "@/lib/mockDatabase"
+import { useState } from "react";
+import { SectionCard } from "@/components/projects/section-card";
+import { Project } from "@/lib/mockDatabase";
 
 interface LeanCanvasTabProps {
   project: Project;
-  onUpdate: (updatedProject: Partial<Project>) => void;
+  updateProject: (updates: Partial<Project>) => void;
 }
 
 interface LeanCanvasSection {
-  title: string
-  key: keyof Project
-  items: { id: string; title: string }[]
-  infoText: string
-  emoji: string
+  title: string;
+  key: keyof Project;
+  items: { id: string; title: string }[];
+  infoText: string;
+  emoji: string;
 }
 
-export function LeanCanvasTab({ project, onUpdate }: LeanCanvasTabProps) {
+export function LeanCanvasTab({ project, updateProject }: LeanCanvasTabProps) {
   const [sections] = useState<LeanCanvasSection[]>([
     {
       title: "Problem",
       key: "problems",
       emoji: "🚫",
       items: project.problems,
-      infoText: "List opp de 3 viktigste problemene kundene dine står overfor"
+      infoText: "List opp de 3 viktigste problemene kundene dine står overfor",
     },
     {
       title: "Kundesegmenter",
       key: "segments",
       emoji: "👥",
       items: project.segments,
-      infoText: "Definer dine målkundegrupper"
+      infoText: "Definer dine målkundegrupper",
     },
     {
       title: "Unikt verdiforslag",
       key: "uniqueSellingPoint",
       emoji: "💎",
       items: [{ id: "1", title: project.uniqueSellingPoint }],
-      infoText: "Forklar hvorfor løsningen din er unik og verdifull"
+      infoText: "Forklar hvorfor løsningen din er unik og verdifull",
     },
     {
       title: "Løsning",
       key: "solutions",
       emoji: "💡",
       items: project.solutions,
-      infoText: "Skissér de viktigste funksjonene i løsningen din"
+      infoText: "Skissér de viktigste funksjonene i løsningen din",
     },
     // Add more sections as needed
-  ])
+  ]);
 
   const handleUpdate = (key: keyof Project, id: string | null, newTitle: string) => {
-    if (key === 'uniqueSellingPoint') {
-      onUpdate({ [key]: newTitle });
+    if (key === "uniqueSellingPoint") {
+      updateProject({ [key]: newTitle });
     } else if (Array.isArray(project[key])) {
-      const updatedItems = id
-        ? (project[key] as any[]).map(item => item.id === id ? { ...item, title: newTitle } : item)
-        : [...(project[key] as any[]), { id: Date.now().toString(), title: newTitle }];
-      onUpdate({ [key]: updatedItems });
+      if (id) {
+        const updatedItems = (project[key] as any[]).map((item) => (item.id === id ? { ...item, title: newTitle } : item));
+        updateProject({ [key]: updatedItems });
+      } else {
+        const newItem = { id: Date.now().toString(), title: newTitle };
+        updateProject({ [key]: [...(project[key] as any[]), newItem] });
+      }
     }
   };
 
@@ -70,12 +73,11 @@ export function LeanCanvasTab({ project, onUpdate }: LeanCanvasTabProps) {
           items={section.items}
           onAdd={() => handleUpdate(section.key, null, `Ny ${section.title.toLowerCase()}`)}
           onEdit={(id, newTitle) => handleUpdate(section.key, id, newTitle)}
-          onDelete={(id) => handleUpdate(section.key, id, '')}
+          onDelete={(id) => handleUpdate(section.key, id, "")}
           addLabel={`Legg til ${section.title.toLowerCase()}`}
           infoText={section.infoText}
         />
       ))}
     </div>
-  )
+  );
 }
-
